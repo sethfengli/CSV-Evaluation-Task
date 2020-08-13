@@ -2,7 +2,7 @@
 
 Coding challenge instuctions locate at [here](https://github.com/sethfengli/CSV-Evaluation-Task/blob/master/CSV-Evaluation-Task.pdf).
 
-[input.csv]((https://github.com/sethfengli/CSV-Evaluation-Task/blob/master/input.csv)), containing the input for this task.
+[input.csv](https://github.com/sethfengli/CSV-Evaluation-Task/blob/master/input.csv), containing the input for this task.
 
 ## How to run app
 
