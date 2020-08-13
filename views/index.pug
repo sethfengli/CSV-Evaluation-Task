@@ -1,0 +1,46 @@
+extends layout
+
+block content
+  .container-fluid
+    .row
+      .col-12.d-flex.justify-content-center.mb-3
+        h3 #{title}
+    .row
+      .col-12
+        form(action="/", method="post", enctype="multipart/form-data")
+          .custom-file.mb-1
+            input.custom-file-input(type="file", id='inputFile', name='inputFile')
+            label.custom-file-label(for="inputFile") Choose file
+          .d-flex.justify-content-end.mb-1
+            button.btn.btn-primary(type="sumbit", disabled=true) Upload
+        if tableHeader
+          .table-responsive
+            table.table.table-hover.table-striped
+              thead.thead-dark
+                tr
+                  each col in tableHeader
+                    td #{col}
+              tbody(height='40vh', overflow-y='scroll')
+                each row in inputArray
+                  tr
+                    each col in row
+                      td #{col}
+    .row
+      .col-12
+        if tableHeader
+          .d-flex.justify-content-between.mb-1
+            h5 Output
+            a.btn.btn-primary(href="/download") Download
+          .table-responsive
+            table.table.table-hover.table-striped
+              thead.thead-dark
+                tr
+                  each col in tableHeader
+                    td #{col}
+              tbody
+                each row in outputArray
+                  tr
+                    each col in row
+                      td #{col}
+  script
+    include index-ui.js
