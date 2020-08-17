@@ -56,8 +56,10 @@ function copyAndCalculateArray(inputArray) {
     outputArray.forEach((row, iRow) => {
       if (iRow != 0) {
         row.forEach((cell, iCol) => {
-          let num = mathjs.evaluate(cell, scope);
-          outputArray[iRow][iCol] =  Number.isInteger(num) ? num : num.toFixed(FIX_DECIMAL);
+          if (cell) {
+            let num = mathjs.evaluate(cell, scope);
+            outputArray[iRow][iCol] =  Number.isInteger(num) ? num : num.toFixed(FIX_DECIMAL);
+          }         
         });
       }
     });
