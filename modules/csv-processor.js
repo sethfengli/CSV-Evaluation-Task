@@ -21,13 +21,11 @@ const FIX_DECIMAL = 3; // format decimal number
 class CsvProcessor {
   constructor (request) {
     this.title = 'CSV Evaluation Task'; 
-    let fileExtension = getFileExtension(request.file.originalname) || "txt";
-    request.app.locals.fileExtension = fileExtension;
-    this.inputArray = csvTo2DArray(request.file.buffer.toString(), fileExtension);
+    request.app.locals.fileExtension = getFileExtension(request.file.originalname) || "txt";
+    this.inputArray = csvTo2DArray(request.file.buffer.toString(), request.app.locals.fileExtension);
     this.outputArray = copyAndCalculateArray(this.inputArray);
-    let outBufffer = convertArrayToCSV(this.outputArray)
-    request.app.locals.outputBuff = outBufffer || "";
     this.tableHeader = createTableHeader(this.inputArray);
+    request.app.locals.outputBuff  = convertArrayToCSV(this.outputArray) || "";
   }
 }
 
@@ -41,24 +39,28 @@ function createTableHeader(inputArray) {
 }
 
 function convertArrayToCSV(outputArray) {
-  return outputArray.reduce((acc, row) => acc + row.toString() + CRLF, '');
-}
+  if (outputArray && outputArray[0]) 
+    return outputArray.reduce((acc, row) => acc + row.toString() + CRLF, '');
+  else 
+    return '';
+} 
 
 function copyAndCalculateArray(inputArray) {
-  let scope = {};
-  let outputArray = [];
-  if (inputArray.length > 0) {
-    let scopeRow = inputArray[0];
-    scopeRow.forEach((value, index) => {
-      scope[numberToCol(index + 1)] = parseFloat(value);
-    });
+  let outputArray;
+  if (inputArray && inputArray[0] && inputArray[0].length > 0) {
+    let scope = {};
+    inputArray[0].forEach((value, index) => scope[numberToCol(index + 1)] = parseFloat(value));
+
     outputArray = JSON.parse(JSON.stringify(inputArray));
     outputArray.forEach((row, iRow) => {
-      if (iRow != 0) {
+      if (iRow !== 0) {
         row.forEach((cell, iCol) => {
           if (cell) {
             let num = mathjs.evaluate(cell, scope);
-            outputArray[iRow][iCol] =  Number.isInteger(num) ? num : num.toFixed(FIX_DECIMAL);
+            if (!isNaN(parseFloat(num)) && isFinite(num)) 
+              outputArray[iRow][iCol] =  Number.isInteger(num) ? num : num.toFixed(FIX_DECIMAL);
+            else
+              outputArray[iRow][iCol] = num;
           }         
         });
       }
@@ -70,9 +72,8 @@ function copyAndCalculateArray(inputArray) {
 function csvTo2DArray(csvString, fileExtension) {
   const rowSeparator = csvString.indexOf(CRLF) > 0 ? CRLF : (csvString.indexOf(CR) > 0 ? CR : LF);
   const cellSeparator = fileExtension === TSV_FILE ? TSV_SEPARATOR : CSV_SEPARATOR;
-  const rows = csvString.split(rowSeparator);
   let results = [];
-  rows.forEach(row => {
+  csvString.split(rowSeparator).forEach(row => {
     results.push(row.split(cellSeparator));
   });
   return results;
@@ -85,9 +86,8 @@ function getFileExtension(filepath) {
 function numberToCol(num) {
   var str = '';
   while (num > 0) {
-    let [q, r] = [(num - 1) / 26, (num - 1) % 26];
-    num = Math.floor(q);
-    str = String.fromCharCode(65 + r) + str;
+    [q, r] = [(num - 1) / 26, (num - 1) % 26];
+    [num, str] = [Math.floor(q), String.fromCharCode(65 + r) + str];
   }
   return str;
 }
